@@ -9,18 +9,22 @@ from multiprocessing import Process
 from time import sleep
 import sys
 
+# User Vars
+var_conf_shutdown_auto = 1   # Enable (1) or Disable (0) automatic printer shutdown
+var_conf_shutdown_time = 12  # Automatic printer shutdown delay time (Seconds)
+
 # Assign GPIOs
-var_gpio_rly1 = 5   # Relay 1   Printer Power
-var_gpio_rly2 = 6   # Relay 2   Fan Power
-var_gpio_spk1 = 12  # Speaker   System Speaker
-var_gpio_led0 = 9   # LED 0     Printer Power
-var_gpio_led1 = 24  # LED 1     Printer Connection
-var_gpio_led2 = 22  # LED 2     Pause/Resume
-var_gpio_btn0 = 25  # Button 0  Printer Power
-var_gpio_btn1 = 4   # Button 1  Home / Cancel / Reconnect
-var_gpio_btn2 = 23  # Button 2  Heat / Cool
-var_gpio_btn3 = 17  # Button 3  Extrude
-var_gpio_btn4 = 27  # Button 4  Pause / Resume
+var_gpio_rly1 = 5            # Relay 1   Printer Power
+var_gpio_rly2 = 6            # Relay 2   Fan Power
+var_gpio_spk1 = 12           # Speaker   System Speaker
+var_gpio_led0 = 9            # LED 0     Printer Power
+var_gpio_led1 = 24           # LED 1     Printer Connection
+var_gpio_led2 = 22           # LED 2     Pause/Resume
+var_gpio_btn0 = 25           # Button 0  Printer Power
+var_gpio_btn1 = 4            # Button 1  Home / Cancel / Reconnect
+var_gpio_btn2 = 23           # Button 2  Heat / Cool
+var_gpio_btn3 = 17           # Button 3  Extrude
+var_gpio_btn4 = 27           # Button 4  Pause / Resume
 
 # Setup GPIOs
 GPIO.setmode(GPIO.BCM)
@@ -212,16 +216,26 @@ def loop_monitor():
         if output_value == False:
             var_state = printer_pull('state', 'detailed')
             if var_state != var_state_previous:
-                if (var_state == 'Operational') and ((var_state_previous == 'Printing') or (var_state_previous == 'Paused')):
+                if (var_state == 'Operational') and (var_state_previous in ('Printing', 'Paused')) and (var_conf_shutdown_auto == 1):
+                    GPIO.output(var_gpio_led1, GPIO.HIGH)
+                    GPIO.output(var_gpio_led2, GPIO.LOW)
                     beep('up')
-                    print("Monitor, GPIO {}, Print completed or canceled. Automated shutdown initiated").format(var_gpio_led1)
-                    while var_state == 'Operational':
-                        GPIO.output(var_gpio_led1, GPIO.HIGH)
+                    sleep(0.5)
+                    print("Monitor, GPIO {0}, Print completed or canceled. Automated shutdown initiated, {1} second delay...").format(var_gpio_led1, var_conf_shutdown_time)
+                    printer_push('temp', 0.0)
+                    printer_push('disconnect')
+                    var_state_previous = 'Disconnected'
+                    for _ in range(var_conf_shutdown_time):
+                        GPIO.output(var_gpio_led1, GPIO.LOW)
                         beep()
                         sleep(0.5)
-                        GPIO.output(var_gpio_led1, GPIO.LOW)
+                        GPIO.output(var_gpio_led1, GPIO.HIGH)
                         sleep(0.5)
-                        var_state = printer_pull('state', 'detailed')
+                    GPIO.output(var_gpio_led1, GPIO.LOW)
+                    beep()
+                    sleep(0.25)
+                    GPIO.output(var_gpio_rly1, GPIO.HIGH)
+                    GPIO.output(var_gpio_rly2, GPIO.HIGH)
                     sleep(0.25)
                 elif (var_state == 'Operational'):
                     GPIO.output(var_gpio_led1, GPIO.HIGH)
@@ -255,7 +269,6 @@ def loop_monitor():
                     GPIO.output(var_gpio_led1, GPIO.LOW)
                     GPIO.output(var_gpio_led2, GPIO.LOW)
                     print("Monitor, GPIO {}, Printer not connected to OctoPrint").format(var_gpio_led1)
-
             if (var_state == 'Paused'):
                 GPIO.output(var_gpio_led2, GPIO.LOW)
                 sleep(0.5)
@@ -355,6 +368,7 @@ def loop():
                         print("Button, GPIO {}, Cancel Print, Home Printhead").format(var_gpio_btn1)
                         printer_push('cancel')
                         #beep('up')            # Handled by monitor
+                        printer_push('temp', 0.0)
                         printer_push('home')
                     else:
                         print("Button, GPIO {}, Connecting to Printer, Home Printhead").format(var_gpio_btn1)
@@ -461,6 +475,8 @@ def loop():
             sleep(0.5)
             while input_value == False:
                 input_value = GPIO.input(var_gpio_btn4)
+
+        sleep(0.05) # Reduce CPU usage of while loop
 
 # Cleanup on Exit
 def destroy():
