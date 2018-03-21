@@ -1,4 +1,4 @@
-# OctoPrintControlPad
+# OctoPrint-ControlPad
 Code used to implement a physical control pad under development for OctoPrint
 
 # Prerequsites
