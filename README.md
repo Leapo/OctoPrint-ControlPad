@@ -1,5 +1,5 @@
 # OctoPrintControlPad
-Code used to implement the physical control pad under development for OctoPrint
+Code used to implement a physical control pad under development for OctoPrint
 
 # Prerequsites
 * Raspberry Pi 2 or 3
