@@ -12,7 +12,7 @@ Currently, this project has only been tested with a Delta Go 3D printer, and con
 # GPIO Assignments
 listen-for-octoprint.py
 
-GPIO | Device   | Primary Function          | Alternative Function (Long-Press)
+GPIO | Device   | Primary Function          | Alt. Function (Button Long-Press)
 ---- | -------- | ------------------------- | -------------
 5    | Relay 1  | Printer Power             | 
 6    | Relay 2  | Fan Power                 | 
