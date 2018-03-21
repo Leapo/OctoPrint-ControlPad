@@ -10,8 +10,6 @@ Code used to implement the physical control pad under development for OctoPrint
 Currently, this project has only been tested with a Delta Go 3D printer, and containts optional functions specific to the Delta Go.
 
 # GPIO Assignments
-GPIO Mode is BCM, with GPIO warnings disabled (as multiple processess will access the same GPIOs, by design)
-
 listen-for-octoprint.py
 
 GPIO | Device   | Primary Function          | Alternative Function (Long-Press)
@@ -34,3 +32,5 @@ GPIO | Device   | Primary Function
 ---- | -------- | ----------------
 12   | Speaker  | System Speaker
 3    | Button 0 | Pi Power
+
+Note: GPIO Mode is BCM. GPIO warnings are disabled (multiple processess will access the same GPIOs, by design)
