@@ -6,10 +6,11 @@ Code used to implement the physical control pad under development for OctoPrint
 * OctoPrint 3.x or higher
 * OctoPrint [Enclosure plugin](https://plugins.octoprint.org/plugins/enclosure/)
 
-#Supported 3D printers
+# Supported 3D printers
 Currently, this project has only been tested with a Delta Go 3D printer, and containts optional functions specific to the Delta Go.
 
 # GPIO Assignments
+listen-for-octoprint.py
 GPIO | Device   | Primary Function         | Alternative Function (Long-Press)
 ---- | -------- | ------------------------- | -------------
 5    | Relay 1  | Printer Power             | 
