@@ -10,16 +10,16 @@ Code used to implement the physical control pad under development for OctoPrint
 Currently, this project has only been tested with a Delta Go 3D printer, and containts optional functions specific to the Delta Go.
 
 # GPIO Assignments
-GPIO | Device   | Function
----- | -------- | --------
-5    | Relay 1  | Printer Power
-6    | Relay 2  | Fan Power
-12   | Speaker  | System Speaker
-9    | LED 0    | Printer Power
-24   | LED 1    | Printer Connection
-22   | LED 2    | Pause/Resume
-25   | Button 0 | Printer Power / Fan Power
-4    | Button 1 | Home / Cancel / Reconnect
-23   | Button 2 | Heat / Cool
-17   | Button 3 | Extrude
-27   | Button 4 | Pause / Resume
+GPIO | Device   | Function                  | Alt. Function
+---- | -------- | ------------------------- | -------------
+5    | Relay 1  | Printer Power             | 
+6    | Relay 2  | Fan Power                 | 
+12   | Speaker  | System Speaker            | 
+9    | LED 0    | Printer Power             | 
+24   | LED 1    | Printer Connection        | 
+22   | LED 2    | Pause/Resume              | 
+25   | Button 0 | Printer Power             | Fan Power
+4    | Button 1 | Home / Cancel / Reconnect | 
+23   | Button 2 | Heat / Cool               | LED Lighting Selection
+17   | Button 3 | Extrude                   | Forced Extrude (Ignore hotend temperature)
+27   | Button 4 | Pause / Resume            | 
