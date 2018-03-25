@@ -25,6 +25,7 @@ var_gpio_btn1 = 4            # Button 1  Home / Cancel / Reconnect
 var_gpio_btn2 = 23           # Button 2  Heat / Cool
 var_gpio_btn3 = 17           # Button 3  Extrude
 var_gpio_btn4 = 27           # Button 4  Pause / Resume
+var_gpio_sen0 = 21           # Sensor 0  Filament Sensor
 
 # Setup GPIOs
 GPIO.setmode(GPIO.BCM)
@@ -45,6 +46,7 @@ GPIO.setup(var_gpio_btn1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(var_gpio_btn2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(var_gpio_btn3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(var_gpio_btn4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(var_gpio_sen0, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Get OctoPrint API Key
 with open("/home/pi/.octoprint/config.yaml") as stream:
@@ -125,7 +127,7 @@ def printer_pull(var_command, var_input1='none'):
         print("{} is not a valid command. Please use one of the following: connection, target, job").format(var_command)
 
 # OctoPrint REST API Push function
-def printer_push(var_command, var_input1='none'):
+def printer_push(var_command, var_input1='none', var_input2='none', var_input3='none'):
     if var_command == 'connect':
         for _ in range(16):
             os.system (('curl -s -H "Content-Type: application/json" -H "X-Api-Key: {0}" -X POST -d \'{{ "command":"connect" }}\' http://127.0.0.1/api/connection').format(var_api_key))
@@ -155,11 +157,12 @@ def printer_push(var_command, var_input1='none'):
     elif var_command == 'temp':
         if var_input1 != 'none':
             os.system (('curl -s -H "Content-Type: application/json" -H "X-Api-Key: {0}" -X POST -d \'{{ "command":"target", "targets": {{ "tool0":{1} }} }}\' http://127.0.0.1/api/printer/tool').format(var_api_key, var_input1))
-    elif var_command == 'extrude':
-        if var_input1 != 'none':
-            os.system (('curl -s -H "Content-Type: application/json" -H "X-Api-Key: {0}" -X POST -d \'{{ "command":"extrude", "amount":{1} }}\' http://127.0.0.1/api/printer/tool').format(var_api_key, var_input1))
+    elif (var_command == 'extrude') and (var_input1 != 'none'):
+        os.system (('curl -s -H "Content-Type: application/json" -H "X-Api-Key: {0}" -X POST -d \'{{ "command":"extrude", "amount":{1} }}\' http://127.0.0.1/api/printer/tool').format(var_api_key, var_input1))
+    elif (var_command == 'rgb') and (var_input1 != 'none') and (var_input2 != 'none') and (var_input3 != 'none'):
+        os.system (('curl -s -H "Content-Type: application/json" -H "X-Api-Key: {0}" -X POST -d \'{{ "command":"M150 R{1} U{2} B{3}" }}\' http://127.0.0.1/api/printer/command').format(var_api_key, var_input1, var_input2, var_input3))
     else:
-        print("{} is not a valid command. Please use one of the following: connect, disconnect, cancel, home, temp").format(var_command)
+        print("{} is not a valid command. Please use one of the following: connect, disconnect, cancel, home, temp, extrude, rgb").format(var_command)
 
 # Wait for OctoPrint to load
 def conwait():
@@ -269,10 +272,14 @@ def loop_monitor():
                     GPIO.output(var_gpio_led1, GPIO.LOW)
                     GPIO.output(var_gpio_led2, GPIO.LOW)
                     print("Monitor, GPIO {}, Printer not connected to OctoPrint").format(var_gpio_led1)
-            if (var_state == 'Paused'):
+            sensor_value = GPIO.input(var_gpio_sen0)
+            if (var_state == 'Paused') or (sensor_value == True):
                 GPIO.output(var_gpio_led2, GPIO.LOW)
                 sleep(0.5)
                 GPIO.output(var_gpio_led2, GPIO.HIGH)
+            if (sensor_value == False):
+                sleep(0.5)
+                GPIO.output(var_gpio_led2, GPIO.LOW)
 
             var_state_previous = var_state
 
@@ -352,7 +359,7 @@ def loop():
                             printer_push('calibrate')
                             sleep(0.5)
                             while input_value == False:
-                                input_value = GPIO.input(var_gpio_btn0)
+                                input_value = GPIO.input(var_gpio_btn1)
                         var_longpress = var_longpress + 1
                         input_value = GPIO.input(var_gpio_btn1)
                         sleep(0.05)
@@ -394,19 +401,50 @@ def loop():
         if input_value == False:
             var_state = printer_pull('state')
             if var_state == 'Connected':
-                var_target = printer_pull('target')
-                if var_target != 'Error':
-                    if var_target == '0.0':
-                        print("Button, GPIO {}, Warming Up (200c)").format(var_gpio_btn2)
-                        beep('up')
-                        printer_push('temp', 200)
+
+                # Button Long-Press - Printer RGB
+                var_longpress = 0
+                while input_value == False:
+                    if var_longpress == 15:
+                        print("Button, GPIO {}, RGB Color Selection").format(var_gpio_btn2)
+                        printer_push('rgb', 000, 000, 000) # Off
+                        sleep(0.5)
+                    elif var_longpress == 16:
+                        printer_push('rgb', 000, 000, 255) # Blue
+                        sleep(0.5)
+                    elif var_longpress == 17:
+                        printer_push('rgb', 255, 000, 000) # Red
+                        sleep(0.5)
+                    elif var_longpress == 18:
+                        printer_push('rgb', 000, 255, 000) # Green
+                        sleep(0.5)
+                    elif var_longpress == 19:
+                        printer_push('rgb', 255, 158, 108) # On Natural
+                        sleep(0.5)
+                    elif var_longpress >= 20:
+                        printer_push('rgb', 255, 255, 255) # On Full
+                        while input_value == False:
+                            input_value = GPIO.input(var_gpio_btn2)
+                    var_longpress = var_longpress + 1
+                    input_value = GPIO.input(var_gpio_btn2)
+                    sleep(0.05)
+
+                # Button Short-Press - Heat / Cool
+                if var_longpress < 15:
+                    var_target = printer_pull('target')
+                    if var_target != 'Error':
+                        if var_target == '0.0':
+                            print("Button, GPIO {}, Warming Up (200c)").format(var_gpio_btn2)
+                            beep('up')
+                            printer_push('temp', 200)
+                        else:
+                            print("Button, GPIO {}, Cooling Down (0c)").format(var_gpio_btn2)
+                            beep('down')
+                            printer_push('temp', 0.0)
                     else:
-                        print("Button, GPIO {}, Cooling Down (0c)").format(var_gpio_btn2)
-                        beep('down')
-                        printer_push('temp', 0.0)
-                else:
-                    print("Button, GPIO {}, Error: Unable to get current temp target").format(var_gpio_btn2)
-                    beep('error')
+                        print("Button, GPIO {}, Error: Unable to get current temp target").format(var_gpio_btn2)
+                        beep('error')
+                var_longpress = 0
             else:
                print("Button, GPIO {}, Error: Connection test failed").format(var_gpio_btn2)
                beep('error')
