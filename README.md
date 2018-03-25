@@ -13,7 +13,7 @@ Currently, this project has only been tested with a Delta Go 3D printer, and con
 listen-for-octoprint.py
 
 GPIO  | Device            | Primary Function          | Alt. Function (Button Long-Press)
-:---: | ----------------- | ------------------------- | -------------
+:---: | :---------------- | :------------------------ | :---
 5     | Relay 1           | Printer Power             | 
 6     | Relay 2           | Fan Power                 | 
 12    | Speaker           | System Speaker            | 
@@ -29,9 +29,9 @@ GPIO  | Device            | Primary Function          | Alt. Function (Button Lo
 
 listen-for-shutdown.py
 
-GPIO  | Device   | Primary Function
-:---: | -------- | ----------------
-12    | Speaker  | System Speaker
-3     | Button 0 | Pi Power
+GPIO  | Device            | Primary Function
+:---: | :---------------- | :---
+12    | Speaker           | System Speaker
+3     | Button 0          | Pi Power
 
 Note: GPIO Mode is BCM. GPIO warnings are disabled (multiple processess will access the same GPIOs, by design)
