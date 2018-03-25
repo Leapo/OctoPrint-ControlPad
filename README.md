@@ -1,15 +1,15 @@
 # OctoPrint-ControlPad
 Code used to implement a physical control pad under development for OctoPrint
 
-# Prerequsites
+## Prerequsites
 * Raspberry Pi 2 or 3
 * OctoPrint 3.x or higher
 * OctoPrint [Enclosure plugin](https://plugins.octoprint.org/plugins/enclosure/)
 
-# Supported 3D printers
+## Supported 3D printers
 Currently, this project has only been tested with a Delta Go 3D printer, and containts optional functions specific to the Delta Go.
 
-# GPIO Assignments
+## GPIO Assignments
 listen-for-octoprint.py
 
 GPIO | Device            | Primary Function          | Alt. Function (Button Long-Press)
