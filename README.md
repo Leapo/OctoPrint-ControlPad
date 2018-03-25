@@ -10,7 +10,7 @@ Code used to implement a physical control pad under development for OctoPrint
 Currently, this project has only been tested with a Delta Go 3D printer, and containts optional functions specific to the Delta Go.
 
 ## GPIO Assignments
-listen-for-octoprint.py
+**listen-for-octoprint.py**
 
 GPIO  | Device            | Primary Function          | Alt. Function (Button Long-Press)
 :---: | :---------------- | :------------------------ | :---
@@ -27,7 +27,7 @@ GPIO  | Device            | Primary Function          | Alt. Function (Button Lo
 27    | Button 4          | Pause / Resume            | 
 21    | Filament Sensor 0 | Pause                     | 
 
-listen-for-shutdown.py
+**listen-for-shutdown.py**
 
 GPIO  | Device            | Primary Function
 :---: | :---------------- | :---
