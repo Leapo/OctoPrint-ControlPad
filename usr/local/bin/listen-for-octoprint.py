@@ -10,6 +10,7 @@ from time import sleep
 import sys
 
 # User Vars
+var_conf_warmup_target = 200 # Target temperature when warming-up the hotend (Degrees C)
 var_conf_shutdown_auto = 1   # Enable (1) or Disable (0) automatic printer shutdown
 var_conf_shutdown_time = 12  # Automatic printer shutdown delay time (Seconds)
 
@@ -30,17 +31,12 @@ var_gpio_sen0 = 21           # Sensor 0  Filament Sensor
 # Setup GPIOs
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(var_gpio_rly1, GPIO.OUT)
-GPIO.output(var_gpio_rly1, GPIO.HIGH)
-GPIO.setup(var_gpio_rly2, GPIO.OUT)
-GPIO.output(var_gpio_rly2, GPIO.HIGH)
+GPIO.setup(var_gpio_rly1, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(var_gpio_rly2, GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setup(var_gpio_spk1, GPIO.OUT)
-GPIO.setup(var_gpio_led1, GPIO.OUT)
-GPIO.setup(var_gpio_led2, GPIO.OUT)
-GPIO.setup(var_gpio_led0, GPIO.OUT)
-GPIO.output(var_gpio_led1, GPIO.LOW)
-GPIO.output(var_gpio_led2, GPIO.LOW)
-GPIO.output(var_gpio_led0, GPIO.LOW)
+GPIO.setup(var_gpio_led1, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(var_gpio_led2, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(var_gpio_led0, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(var_gpio_btn0, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(var_gpio_btn1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(var_gpio_btn2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -436,7 +432,7 @@ def loop():
                         if var_target == '0.0':
                             print("Button, GPIO {}, Warming Up (200c)").format(var_gpio_btn2)
                             beep('up')
-                            printer_push('temp', 200)
+                            printer_push('temp', var_conf_warmup_target)
                         else:
                             print("Button, GPIO {}, Cooling Down (0c)").format(var_gpio_btn2)
                             beep('down')
@@ -478,7 +474,7 @@ def loop():
                     var_target = printer_pull('target')
                     if var_target != 'Error':
                         var_target_float = float(var_target)
-                        if var_target_float >= 170.0:
+                        if var_target_float >= 180.0:
                             print("Button, GPIO {}, Extruding (2mm)").format(var_gpio_btn3)
                             beep('up')
                             printer_push('extrude', 2)
