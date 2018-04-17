@@ -36,6 +36,7 @@ p.stop()
 
 # Wait for power button
 GPIO.wait_for_edge(3, GPIO.FALLING)
+sleep(0.1)
 
 # Shutdown Sound
 p = GPIO.PWM(12, 1800)       #GPIO, Hz
